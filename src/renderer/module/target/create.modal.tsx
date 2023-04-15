@@ -1,63 +1,69 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   DatePicker,
   DatePickerProps,
   Form,
   Input,
+  InputNumber,
   Modal,
-  Radio,
-} from "antd";
-import { ipcRenderer } from "electron";
-import { toast } from "react-toastify";
-import TextArea from "antd/es/input/TextArea";
+  Select,
+} from 'antd';
+import { ipcRenderer } from 'electron';
+import { toast } from 'react-toastify';
+import TextArea from 'antd/es/input/TextArea';
+import EVALUATION_METHOD from 'renderer/constant/EvaluationMethod';
 
 interface PropsModal {
   isOpen: boolean;
   toggle: any;
 }
 
+const { Option } = Select;
+
 const CreateTargetModal = (props: PropsModal) => {
   const [form] = Form.useForm();
+  const [method_evaluate, set_method_evaluate] = useState(0);
 
   const onRequiredTypeChange = () => {};
   useEffect(() => {
-    console.log("Modal", props);
+    console.log('Modal', props);
   }, [props]);
 
-  const onChange: DatePickerProps["onChange"] = (date, dateString) => {
+  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
     console.log(date, dateString);
   };
 
   const handleOk = async () => {
-    // return;
-    let resp = await ipcRenderer.invoke("CREATE_TARGET", {
-      title: form.getFieldValue("title"),
-      description: form.getFieldValue("description"),
-      deadline: form.getFieldValue("deadline").toDate(),
+    let resp = await ipcRenderer.invoke('CREATE_TARGET', {
+      title: form.getFieldValue('title'),
+      description: form.getFieldValue('description'),
+      deadline: form.getFieldValue('deadline').toDate(),
+      detail: form.getFieldValue('detail') || '',
+      detailPoint: form.getFieldValue('detailPoint') || 0,
+      evaluationMethods: form.getFieldValue('evaluation_method'),
     });
     if (resp?.id) {
-      console.log("done");
-      toast.success(" Thành công!", {
-        position: "top-right",
+      toast.success(' Thành công!', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: 'light',
       });
     } else {
-      toast.error(" Lỗi!", {
-        position: "top-right",
+      toast.error(' Lỗi!', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: 'light',
       });
     }
     props.toggle();
@@ -100,7 +106,7 @@ const CreateTargetModal = (props: PropsModal) => {
             rules={[
               {
                 required: true,
-                message: " Vui lòng nhập chỉ tiêu!",
+                message: ' Vui lòng nhập chỉ tiêu!',
               },
             ]}
           >
@@ -113,12 +119,66 @@ const CreateTargetModal = (props: PropsModal) => {
             rules={[
               {
                 required: true,
-                message: " Vui lòng nhập nội dung chỉ tiêu!",
+                message: ' Vui lòng nhập nội dung chỉ tiêu!',
               },
             ]}
           >
             <TextArea placeholder="Nhập nội dung chỉ tiêu" />
           </Form.Item>
+          <Form.Item
+            name="evaluation_method"
+            label="Phương pháp đánh giá"
+            rules={[{ required: true }]}
+          >
+            <Select onChange={(e) => set_method_evaluate(e)} allowClear>
+              <Option value={EVALUATION_METHOD.METHOD_ONE}>
+                Phương pháp 1
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_TWO}>
+                Phương pháp 2
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_THREE}>
+                Phương pháp 3
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_FOUR}>
+                Phương pháp 4
+              </Option>
+            </Select>
+          </Form.Item>
+          {method_evaluate == EVALUATION_METHOD.METHOD_ONE && (
+            <Form.Item
+              label="Cụ thể đánh giá"
+              tooltip="This is a required field"
+              name="detail"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Nhập cụ thể đánh giá!',
+                },
+              ]}
+            >
+              <TextArea placeholder="Nhập cụ thể đánh giá" />
+            </Form.Item>
+          )}
+
+          {[
+            EVALUATION_METHOD.METHOD_TWO,
+            EVALUATION_METHOD.METHOD_THREE,
+          ].includes(method_evaluate) && (
+            <Form.Item
+              label="Cụ thể đánh giá"
+              tooltip="This is a required field"
+              name="detailPoint"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Nhập cụ thể đánh giá!',
+                },
+              ]}
+            >
+              <InputNumber placeholder="Nhập chỉ tiêu" />
+            </Form.Item>
+          )}
 
           <Form.Item
             label="Ngày cuối thực hiện"
@@ -127,11 +187,11 @@ const CreateTargetModal = (props: PropsModal) => {
             rules={[
               {
                 required: true,
-                message: " Vui lòng nhập ngày chốt sổ!",
+                message: ' Vui lòng nhập ngày chốt sổ!',
               },
             ]}
           >
-            <DatePicker onChange={onChange} style={{ width: "100%" }} />
+            <DatePicker onChange={onChange} style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>

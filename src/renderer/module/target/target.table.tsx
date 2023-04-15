@@ -1,11 +1,11 @@
-import { Button, Popconfirm, Table } from "antd";
-import { ColumnsType, TableProps } from "antd/es/table";
-import { ipcRenderer } from "electron";
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { toast } from "react-toastify";
-import EditTargetModal from "./edit.modal";
+import { Button, Popconfirm, Table } from 'antd';
+import { ColumnsType, TableProps } from 'antd/es/table';
+import { ipcRenderer } from 'electron';
+import { useEffect, useState } from 'react';
+import dayjs from 'dayjs';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { toast } from 'react-toastify';
+import EditTargetModal from './edit.modal';
 
 interface TargetEntity {
   id: React.Key;
@@ -21,38 +21,58 @@ interface TargetTableProps {
 export const TargetTable = (props: TargetTableProps) => {
   const columns: ColumnsType<TargetEntity> = [
     {
-      title: "STT",
-      dataIndex: "id",
-      width: "10%",
+      title: 'STT',
+      dataIndex: 'id',
+      width: '10%',
     },
     {
-      title: "Chỉ tiêu",
-      dataIndex: "title",
+      title: 'Chỉ tiêu',
+      dataIndex: 'title',
       filterSearch: true,
       onFilter: (value: any, record) => record.title.startsWith(value),
     },
     {
-      title: "Nội dung",
-      dataIndex: "description",
+      title: 'Nội dung',
+      dataIndex: 'description',
       filterSearch: true,
       onFilter: (value: any, record) => record.description.includes(value),
     },
     {
-      title: "Thời hạn",
-      dataIndex: "deadline",
+      title: 'Phương pháp đánh giá',
+      dataIndex: 'evaluationMethods',
       filterSearch: true,
-      render: (value) => `${dayjs(value).format("DD/MM/YYYY")}`,
+      onFilter: (value: any, record) => record.description.includes(value),
     },
     {
-      title: "Action",
-      width: "10%",
+      title: 'Cụ thể',
+      children: [
+        {
+          dataIndex: 'detail',
+          render: (item) => (item ? item : ''),
+        },
+        {
+          dataIndex: 'detailPoint',
+          render: (item) => (item ? item : ''),
+        },
+      ],
+    },
+
+    {
+      title: 'Thời hạn',
+      dataIndex: 'deadline',
+      filterSearch: true,
+      render: (value) => `${dayjs(value).format('DD/MM/YYYY')}`,
+    },
+    {
+      title: 'Action',
+      width: '10%',
       render: (value: any, record) => {
         return (
           <>
             <Button
               type="default"
               icon={<EditOutlined />}
-              size={"small"}
+              size={'small'}
               onClick={() => edit(value)}
             />
 
@@ -65,11 +85,11 @@ export const TargetTable = (props: TargetTableProps) => {
               cancelText="No"
             >
               <Button
-                style={{ margin: "0 10px" }}
+                style={{ margin: '0 10px' }}
                 type="default"
                 danger
                 icon={<DeleteOutlined />}
-                size={"small"}
+                size={'small'}
               />
             </Popconfirm>
           </>
@@ -82,37 +102,37 @@ export const TargetTable = (props: TargetTableProps) => {
   let [data_selected, set_data_selected] = useState<TargetEntity>();
   let [open, set_open] = useState(false);
 
-  const onChange: TableProps<TargetEntity>["onChange"] = (
+  const onChange: TableProps<TargetEntity>['onChange'] = (
     pagination,
     filters,
     sorter,
     extra
   ) => {
-    console.log("params", pagination, filters, sorter, extra);
+    console.log('params', pagination, filters, sorter, extra);
   };
 
   const edit = (value: any) => {
-    console.log("value", value);
+    console.log('value', value);
     set_data_selected(value);
     set_open(true);
   };
 
   const delete_team = (value: any) => {
-    console.log("value", value);
-    toast.success(" Chưa làm!", {
-      position: "top-right",
+    console.log('value', value);
+    toast.success(' Chưa làm!', {
+      position: 'top-right',
       autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: "light",
+      theme: 'light',
     });
   };
 
   const get_data = async () => {
-    let data = await ipcRenderer.invoke("GET_LIST_TARGET", true);
+    let data = await ipcRenderer.invoke('GET_LIST_TARGET', true);
     set_data(data);
   };
 

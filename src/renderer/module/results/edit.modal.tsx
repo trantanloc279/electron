@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Button, Form, Input, Modal, Select } from "antd";
-import { ipcRenderer } from "electron";
-import { toast } from "react-toastify";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, InputNumber, Modal, Select } from 'antd';
+import { ipcRenderer } from 'electron';
+import { toast } from 'react-toastify';
+import EVALUATION_METHOD from 'renderer/constant/EvaluationMethod';
+import TextArea from 'antd/es/input/TextArea';
+import RESULT_STATUS from 'renderer/constant/ResultStatus';
 
 interface PropsModal {
   isOpen: boolean;
   toggle: any;
   data: any;
 }
-
+const { Option } = Select;
 const EditResultModal = (props: PropsModal) => {
   const [form] = Form.useForm();
   const [targets, set_targets] = useState([]);
@@ -16,42 +19,43 @@ const EditResultModal = (props: PropsModal) => {
   const onRequiredTypeChange = () => {};
 
   const handleOk = async () => {
-    let resp = await ipcRenderer.invoke("EDIT_RESULT", {
-      id: form.getFieldValue("id"),
-      targetId: form.getFieldValue("targetId"),
-      teamId: form.getFieldValue("teamId"),
-      checkPoint: form.getFieldValue("checkPoint"),
-      process: form.getFieldValue("process"),
+    let resp = await ipcRenderer.invoke('EDIT_RESULT', {
+      id: form.getFieldValue('id'),
+      targetId: form.getFieldValue('targetId'),
+      teamId: form.getFieldValue('teamId'),
+      result: form.getFieldValue('result') || '',
+      resultPoint: form.getFieldValue('resultPoint') || 0,
+      status: form.getFieldValue('evaluate') || 0,
     });
     if (resp?.id) {
-      console.log("done");
-      toast.success(" Thành công!", {
-        position: "top-right",
+      console.log('done');
+      toast.success(' Thành công!', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: 'light',
       });
     } else {
-      toast.error(" Lỗi!", {
-        position: "top-right",
+      toast.error(' Lỗi!', {
+        position: 'top-right',
         autoClose: 5000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
         progress: undefined,
-        theme: "light",
+        theme: 'light',
       });
     }
     props.toggle();
   };
 
   const get_targets = async () => {
-    let data = await ipcRenderer.invoke("GET_LIST_TARGET", true);
+    let data = await ipcRenderer.invoke('GET_LIST_TARGET', true);
     let temp = data.map((item: any) => {
       return {
         value: item?.id,
@@ -61,7 +65,7 @@ const EditResultModal = (props: PropsModal) => {
     set_targets(temp);
   };
   const get_teams = async () => {
-    let data = await ipcRenderer.invoke("GET_LIST_TEAM", true);
+    let data = await ipcRenderer.invoke('GET_LIST_TEAM', true);
     let temp = data.map((item: any) => {
       return {
         value: item?.id,
@@ -74,11 +78,17 @@ const EditResultModal = (props: PropsModal) => {
   useEffect(() => {
     get_targets();
     get_teams();
-    form.setFieldValue("id", props.data.id);
-    form.setFieldValue("targetId", props.data.targetId);
-    form.setFieldValue("teamId", props.data.teamId);
-    form.setFieldValue("checkPoint", props.data.checkPoint);
-    form.setFieldValue("process", props.data.process);
+    form.setFieldValue('id', props.data.id);
+    form.setFieldValue('targetId', props.data.targetId);
+    form.setFieldValue('teamId', props.data.teamId);
+    // form.setFieldValue('checkPoint', props.data.checkPoint);
+    form.setFieldValue('result', props.data.result);
+    form.setFieldValue('result', props.data.resultPoint);
+    form.setFieldValue(
+      'evaluation_method',
+      props.data.target.evaluationMethods
+    );
+    console.log({ data: props.data });
   }, []);
   return (
     <>
@@ -120,22 +130,22 @@ const EditResultModal = (props: PropsModal) => {
             rules={[
               {
                 required: true,
-                message: " Vui lòng chọn chỉ tiêu!",
+                message: ' Vui lòng chọn chỉ tiêu!',
               },
             ]}
           >
             <Select
               showSearch
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
               placeholder="Search to Select"
               optionFilterProp="children"
               filterOption={(input, option: any) =>
-                (option?.label ?? "").includes(input)
+                (option?.label ?? '').includes(input)
               }
               filterSort={(optionA, optionB) =>
-                (optionA?.label ?? "")
+                (optionA?.label ?? '')
                   .toLowerCase()
-                  .localeCompare((optionB?.label ?? "").toLowerCase())
+                  .localeCompare((optionB?.label ?? '').toLowerCase())
               }
               options={targets}
             />
@@ -147,52 +157,97 @@ const EditResultModal = (props: PropsModal) => {
             rules={[
               {
                 required: true,
-                message: " Vui lòng chọn đội thực hiện!",
+                message: ' Vui lòng chọn đội thực hiện!',
               },
             ]}
           >
             <Select
               showSearch
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
               placeholder="Search to Select"
               optionFilterProp="children"
               filterOption={(input, option: any) =>
-                (option?.label ?? "").includes(input)
+                (option?.label ?? '').includes(input)
               }
               filterSort={(optionA, optionB) =>
-                (optionA?.label ?? "")
+                (optionA?.label ?? '')
                   .toLowerCase()
-                  .localeCompare((optionB?.label ?? "").toLowerCase())
+                  .localeCompare((optionB?.label ?? '').toLowerCase())
               }
               options={teams}
             />
-          </Form.Item>{" "}
-          <Form.Item
-            label="Tiến độ thực hiện"
-            tooltip="This is a required field"
-            name="process"
-            rules={[
-              {
-                required: true,
-                message: " Vui lòng nhập tiến độ thực hiện!",
-              },
-            ]}
-          >
-            <Input placeholder="Nhập tiến độ thực hiện" />
           </Form.Item>
           <Form.Item
-            label="Điểm đánh giá"
-            tooltip="This is a required field"
-            name="checkPoint"
-            rules={[
-              {
-                required: true,
-                message: " Vui lòng nhập điểm đánh giá!",
-              },
-            ]}
+            name="evaluation_method"
+            label="Phương pháp đánh giá"
+            rules={[{ required: true }]}
           >
-            <Input placeholder="Nhập điểm đánh giá" />
+            <Select onChange={(e) => console.log({ e })} allowClear disabled>
+              <Option value={EVALUATION_METHOD.METHOD_ONE}>
+                Phương pháp 1
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_TWO}>
+                Phương pháp 2
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_THREE}>
+                Phương pháp 3
+              </Option>
+              <Option value={EVALUATION_METHOD.METHOD_FOUR}>
+                Phương pháp 4
+              </Option>
+            </Select>
           </Form.Item>
+          {[
+            EVALUATION_METHOD.METHOD_TWO,
+            EVALUATION_METHOD.METHOD_THREE,
+          ].includes(props.data.target.evaluationMethods) && (
+            <Form.Item
+              label="Điểm đánh giá"
+              tooltip="This is a required field"
+              name="resultPoint"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng nhập điểm đánh giá!',
+                },
+              ]}
+            >
+              <InputNumber placeholder="Nhập điểm đánh giá" />
+            </Form.Item>
+          )}
+
+          {[EVALUATION_METHOD.METHOD_ONE].includes(
+            props.data.target.evaluationMethods
+          ) && (
+            <Form.Item
+              label="Kết quả"
+              tooltip="This is a required field"
+              name="result"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng nhập kết quả đánh giá!',
+                },
+              ]}
+            >
+              <TextArea placeholder="Nhập kết quả đánh giá" />
+            </Form.Item>
+          )}
+
+          {[
+            EVALUATION_METHOD.METHOD_ONE,
+            EVALUATION_METHOD.METHOD_FOUR,
+          ].includes(props.data.target.evaluationMethods) && (
+            <Form.Item name="evaluate" label="Đánh giá">
+              <Select onChange={(e) => console.log({ e })} allowClear>
+                <Option value={RESULT_STATUS.SUCCESS}>Đạt yêu cầu</Option>
+                <Option value={RESULT_STATUS.FAILED}>Không đạt</Option>
+                {[EVALUATION_METHOD.METHOD_THREE].includes(
+                  props.data.target.evaluationMethods
+                ) && <Option value={RESULT_STATUS.GOOD}>Vươt yêu cầu</Option>}
+              </Select>
+            </Form.Item>
+          )}
         </Form>
       </Modal>
     </>

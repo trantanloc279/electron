@@ -19,6 +19,7 @@ import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import RESULT_STATUS from './ResultStatus';
 import fs from 'fs';
+import EVALUATION_METHOD from './EvaluationMethod';
 // import { PrismaClient } from '@prisma/client';
 const { PrismaClient } = require('@prisma/client');
 
@@ -89,7 +90,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -146,7 +147,7 @@ app
 
 // Prisma
 const dbPath = isDev
-  ? path.join(__dirname, '../../prisma/dev.db')
+  ? path.join(__dirname, '../../prisma/database_dev.db')
   : path.join(app.getPath('userData'), 'database_prod.db');
 
 if (!isDev) {
@@ -337,14 +338,23 @@ app.on('ready', () => {
 
   ipcMain.handle('CREATE_RESULT', async (e, message: any) => {
     console.log(message);
-    let data = await prisma.result.create({
-      data: {
-        targetId: message.targetId,
-        teamId: message.teamId,
-        checkPoint: 0,
-        status: 0,
-        process: '',
+    let target = await prisma.target.findUnique({
+      where: {
+        id: message.targetId,
       },
+    });
+    let dto = {
+      targetId: message.targetId,
+      teamId: message.teamId,
+      status:
+        target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR
+          ? RESULT_STATUS.SUCCESS
+          : RESULT_STATUS.PROCESS,
+      result: '',
+      resultPoint: 0,
+    };
+    let data = await prisma.result.create({
+      data: dto,
     });
     console.log('data', data);
     return data;
@@ -352,25 +362,39 @@ app.on('ready', () => {
 
   ipcMain.handle('EDIT_RESULT', async (e, message: any) => {
     console.log('message', message);
+    let status = message.status || 0;
+    let target = await prisma.target.findUnique({
+      where: {
+        id: message.targetId,
+      },
+    });
+    if (target.evaluationMethods == EVALUATION_METHOD.METHOD_TWO) {
+      if (message.resultPoint >= target.detailPoint) {
+        status = RESULT_STATUS.SUCCESS;
+      } else {
+        status = RESULT_STATUS.FAILED;
+      }
+    }
+    if (target.evaluationMethods == EVALUATION_METHOD.METHOD_THREE) {
+      if (message.resultPoint == target.detailPoint) {
+        status = RESULT_STATUS.SUCCESS;
+      }
+      if (message.resultPoint < target.detailPoint) {
+        status = RESULT_STATUS.FAILED;
+      }
+      if (message.resultPoint > target.detailPoint) {
+        status = RESULT_STATUS.GOOD;
+      }
+    }
 
-    let status = 0;
-    if (message.checkPoint == 0) {
-      status = RESULT_STATUS.PROCESS;
-    }
-    if (message.checkPoint >= 35) {
-      status = RESULT_STATUS.SUCCESS;
-    }
-    if (message.checkPoint < 35 && message.checkPoint > 0) {
-      status = RESULT_STATUS.FAILED;
-    }
     let data = await prisma.result.update({
       where: { id: message.id },
       data: {
         targetId: message.targetId,
         teamId: message.teamId,
-        checkPoint: Number(message.checkPoint),
+        resultPoint: Number(message.resultPoint),
+        result: message.result,
         status: status,
-        process: message.process,
       },
     });
     console.log('data', data);

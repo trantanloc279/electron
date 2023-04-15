@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = "file:./database_dev.db"
 }
 
 model Team {
@@ -20,20 +20,23 @@ model Team {
 }
 
 model Target {
-  id          Int       @id @default(autoincrement())
-  title       String?
-  description String?
-  deadline    DateTime?
-  Result      Result[]
+  id                Int       @id @default(autoincrement())
+  title             String?
+  description       String?
+  deadline          DateTime?
+  detail            String
+  detailPoint       Int?
+  evaluationMethods Int?
+  Result            Result[]
 }
 
 model Result {
-  id         Int    @id @default(autoincrement())
-  teamId     Int
-  targetId   Int
-  team       Team   @relation(fields: [teamId], references: [id])
-  target     Target @relation(fields: [targetId], references: [id])
-  status     Int
-  checkPoint Int
-  process    String
+  id          Int     @id @default(autoincrement())
+  teamId      Int
+  targetId    Int
+  team        Team    @relation(fields: [teamId], references: [id])
+  target      Target  @relation(fields: [targetId], references: [id])
+  status      Int
+  result      String?
+  resultPoint Int?
 }
