@@ -24,6 +24,7 @@ const { Option } = Select;
 const CreateTargetModal = (props: PropsModal) => {
   const [form] = Form.useForm();
   const [method_evaluate, set_method_evaluate] = useState(0);
+  const [sub_method_evaluate, set_sub_method_evaluate] = useState(0);
 
   const onRequiredTypeChange = () => {};
   useEffect(() => {
@@ -42,6 +43,8 @@ const CreateTargetModal = (props: PropsModal) => {
       detail: form.getFieldValue('detail') || '',
       detailPoint: form.getFieldValue('detailPoint') || 0,
       evaluationMethods: form.getFieldValue('evaluation_method'),
+      conditionEvaluationMethodTwo:
+        form.getFieldValue('conditionEvaluationMethodTwo') || 0,
     });
     if (resp?.id) {
       toast.success(' Thành công!', {
@@ -177,6 +180,25 @@ const CreateTargetModal = (props: PropsModal) => {
               ]}
             >
               <InputNumber placeholder="Nhập chỉ tiêu" />
+            </Form.Item>
+          )}
+
+          {[EVALUATION_METHOD.METHOD_TWO].includes(method_evaluate) && (
+            <Form.Item
+              label="Đánh giá"
+              tooltip="This is a required field"
+              name="conditionEvaluationMethodTwo"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Đánh giá!',
+                },
+              ]}
+            >
+              <Select onChange={(e) => set_sub_method_evaluate(e)} allowClear>
+                <Option value={1}>Trên</Option>
+                <Option value={0}>Dưới</Option>
+              </Select>
             </Form.Item>
           )}
 

@@ -4,7 +4,6 @@ import { ColumnsType, TableProps } from 'antd/es/table';
 import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import OSApi from 'renderer/os-api';
 import EditTeamModal from './edit.modal';
 
 interface TeamEntity {
@@ -24,7 +23,7 @@ export const TeamTable = (props: TeamTableProps) => {
       width: '10%',
     },
     {
-      title: 'Tên đội',
+      title: 'Tên đơn vị',
       dataIndex: 'name',
       filterSearch: true,
       onFilter: (value: any, record) => record.name.startsWith(value),

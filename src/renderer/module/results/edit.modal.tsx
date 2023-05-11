@@ -88,6 +88,10 @@ const EditResultModal = (props: PropsModal) => {
       'evaluation_method',
       props.data.target.evaluationMethods
     );
+    form.setFieldValue(
+      'conditionEvaluationMethodTwo',
+      props.data.target.conditionEvaluationMethodTwo
+    );
     console.log({ data: props.data });
   }, []);
   return (
@@ -213,6 +217,26 @@ const EditResultModal = (props: PropsModal) => {
               ]}
             >
               <InputNumber placeholder="Nhập điểm đánh giá" />
+            </Form.Item>
+          )}
+          {[EVALUATION_METHOD.METHOD_TWO].includes(
+            props.data.target.evaluationMethods
+          ) && (
+            <Form.Item
+              label="Đánh giá"
+              tooltip="This is a required field"
+              name="conditionEvaluationMethodTwo"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Đánh giá!',
+                },
+              ]}
+            >
+              <Select allowClear disabled>
+                <Option value={1}>Trên</Option>
+                <Option value={0}>Dưới</Option>
+              </Select>
             </Form.Item>
           )}
 

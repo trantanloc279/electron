@@ -18,6 +18,7 @@ export const ResultModule = () => {
         >
           Thêm mới
         </Button>
+
         {open && (
           <CreateResultModal isOpen={open} toggle={() => set_open(false)} />
         )}

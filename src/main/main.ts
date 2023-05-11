@@ -369,10 +369,18 @@ app.on('ready', () => {
       },
     });
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_TWO) {
-      if (message.resultPoint >= target.detailPoint) {
-        status = RESULT_STATUS.SUCCESS;
+      if (target.conditionEvaluationMethodTwo == 0) {
+        if (message.resultPoint < target.detailPoint) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
       } else {
-        status = RESULT_STATUS.FAILED;
+        if (message.resultPoint >= target.detailPoint) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
       }
     }
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_THREE) {

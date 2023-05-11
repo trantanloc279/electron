@@ -2,12 +2,12 @@ import { Button, Popconfirm, Table, Tag } from 'antd';
 import { ColumnsType, TableProps } from 'antd/es/table';
 import { ipcRenderer } from 'electron';
 import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import EditResultModal from './edit.modal';
 import RESULT_STATUS from 'renderer/constant/ResultStatus';
 import EVALUATION_METHOD from 'renderer/constant/EvaluationMethod';
+import { Excel } from 'antd-table-saveas-excel';
 
 interface ResultEntity {
   id: React.Key;
@@ -16,6 +16,8 @@ interface ResultEntity {
   deadline: Date;
   result: string;
   resultPoint: number;
+  target: any;
+  team: any;
 }
 
 interface ResultTableProps {
@@ -44,11 +46,11 @@ export const ResultTable = (props: ResultTableProps) => {
       dataIndex: 'team',
       render: (item) => item.name,
     },
-    {
-      title: 'Thời gian chốt số liệu',
-      dataIndex: 'target',
-      render: (value) => `${dayjs(value.deadline).format('DD/MM/YYYY')}`,
-    },
+    // {
+    //   title: 'Thời gian chốt số liệu',
+    //   dataIndex: 'target',
+    //   render: (value) => `${dayjs(value.deadline).format('DD/MM/YYYY')}`,
+    // },
     {
       title: 'Cụ thể',
       dataIndex: 'target',
@@ -161,6 +163,81 @@ export const ResultTable = (props: ResultTableProps) => {
   const get_data = async () => {
     let data = await ipcRenderer.invoke('GET_LIST_RESULT', true);
     set_data(data);
+
+    console.log(data);
+  };
+  const get_string_status = (item: any) => {
+    switch (item.status) {
+      case RESULT_STATUS.PROCESS:
+        return 'Đang đánh giá';
+      case RESULT_STATUS.SUCCESS:
+        return 'Đạt chỉ tiêu';
+      case RESULT_STATUS.GOOD:
+        return 'Vượt chỉ tiêu';
+      case RESULT_STATUS.FAILED:
+        return 'Chưa đạt chỉ tiêu';
+    }
+  };
+
+  const handleClick = () => {
+    let data_source = data.map((item) => {
+      return {
+        stt: item.id,
+        target: item?.target.title,
+        target_description: item?.target.description,
+        team: item?.team.name,
+        detail: [
+          EVALUATION_METHOD.METHOD_TWO,
+          EVALUATION_METHOD.METHOD_THREE,
+        ].includes(item?.target.evaluationMethods)
+          ? item?.target.detailPoint
+          : item?.target.detail,
+        result: [
+          EVALUATION_METHOD.METHOD_TWO,
+          EVALUATION_METHOD.METHOD_THREE,
+        ].includes(item?.target.evaluationMethods)
+          ? item?.resultPoint
+          : item?.result,
+        evaluate: get_string_status(item),
+      };
+    });
+    const excel = new Excel();
+    excel
+      .addSheet('test')
+      .addColumns([
+        {
+          title: 'STT',
+          dataIndex: 'stt',
+        },
+        {
+          title: 'Chỉ tiêu',
+          dataIndex: 'target',
+        },
+        {
+          title: 'Nội dung chỉ tiêu',
+          dataIndex: 'target_description',
+        },
+        {
+          title: 'Đơn vị theo dõi',
+          dataIndex: 'team',
+        },
+        {
+          title: 'Cụ thể',
+          dataIndex: 'detail',
+        },
+        {
+          title: 'Kêt quả',
+          dataIndex: 'result',
+        },
+        {
+          title: 'Đánh giá',
+          dataIndex: 'evaluate',
+        },
+      ])
+      .addDataSource(data_source, {
+        str2Percent: true,
+      })
+      .saveAs('Excel.xlsx');
   };
 
   useEffect(() => {
@@ -169,6 +246,13 @@ export const ResultTable = (props: ResultTableProps) => {
 
   return (
     <>
+      <Button
+        type="primary"
+        style={{ marginLeft: '8px' }}
+        onClick={handleClick}
+      >
+        Xuất Excel
+      </Button>
       <Table columns={columns} dataSource={data} onChange={onChange} />
       {open && (
         <EditResultModal

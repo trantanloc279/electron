@@ -20,14 +20,15 @@ model Team {
 }
 
 model Target {
-  id                Int       @id @default(autoincrement())
-  title             String?
-  description       String?
-  deadline          DateTime?
-  detail            String
-  detailPoint       Int?
-  evaluationMethods Int?
-  Result            Result[]
+  id                           Int       @id @default(autoincrement())
+  title                        String?
+  description                  String?
+  deadline                     DateTime?
+  detail                       String
+  detailPoint                  Int?
+  evaluationMethods            Int?
+  conditionEvaluationMethodTwo Int?
+  Result                       Result[]
 }
 
 model Result {

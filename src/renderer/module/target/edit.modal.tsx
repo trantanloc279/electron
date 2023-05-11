@@ -26,6 +26,7 @@ interface PropsModal {
 const EditTargetModal = (props: PropsModal) => {
   const [form] = Form.useForm();
   const [method_evaluate, set_method_evaluate] = useState(0);
+  const [sub_method_evaluate, set_sub_method_evaluate] = useState(0);
 
   const onRequiredTypeChange = () => {};
 
@@ -34,12 +35,18 @@ const EditTargetModal = (props: PropsModal) => {
   }, [props]);
 
   useEffect(() => {
+    console.log(props.data);
     form.setFieldValue('title', props.data.title);
     form.setFieldValue('id', props.data.id);
     form.setFieldValue('description', props.data.description);
     form.setFieldValue('deadline', dayjs(props.data.deadline));
     form.setFieldValue('detail', props.data.detail);
+    form.setFieldValue('detailPoint', props.data.detailPoint);
     form.setFieldValue('evaluation_method', props.data.evaluationMethods);
+    form.setFieldValue(
+      'conditionEvaluationMethodTwo',
+      props.data.conditionEvaluationMethodTwo
+    );
     set_method_evaluate(props.data.evaluationMethods);
   }, []);
   const onChange: DatePickerProps['onChange'] = (date, dateString) => {
@@ -57,6 +64,8 @@ const EditTargetModal = (props: PropsModal) => {
       detail: form.getFieldValue('detail') || '',
       detailPoint: Number(form.getFieldValue('detailPoint')) || 0,
       evaluationMethods: form.getFieldValue('evaluation_method'),
+      conditionEvaluationMethodTwo:
+        form.getFieldValue('conditionEvaluationMethodTwo') || 0,
     });
     if (resp?.id) {
       toast.success(' Thành công!', {
@@ -205,6 +214,25 @@ const EditTargetModal = (props: PropsModal) => {
               ]}
             >
               <Input placeholder="Nhập chỉ tiêu" />
+            </Form.Item>
+          )}
+
+          {[EVALUATION_METHOD.METHOD_TWO].includes(method_evaluate) && (
+            <Form.Item
+              label="Đánh giá"
+              tooltip="This is a required field"
+              name="conditionEvaluationMethodTwo"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Đánh giá!',
+                },
+              ]}
+            >
+              <Select onChange={(e) => set_sub_method_evaluate(e)} allowClear>
+                <Option value={1}>Trên</Option>
+                <Option value={0}>Dưới</Option>
+              </Select>
             </Form.Item>
           )}
 
