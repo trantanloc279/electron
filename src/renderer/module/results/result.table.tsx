@@ -14,6 +14,8 @@ interface ResultEntity {
   title: string;
   description: string;
   deadline: Date;
+  result: string;
+  resultPoint: number;
 }
 
 interface ResultTableProps {
@@ -64,11 +66,15 @@ export const ResultTable = (props: ResultTableProps) => {
     },
     {
       title: 'Kết quả',
-
-      children: [
-        { dataIndex: 'result', render: (item) => item },
-        { dataIndex: 'resultPoint', render: (item) => item },
-      ],
+      render: (_, record) => {
+        if (Boolean(record.result)) {
+          return record.result;
+        }
+        if (Boolean(record.resultPoint)) {
+          return record.resultPoint;
+        }
+        return '';
+      },
     },
     {
       title: 'Đánh giá',
@@ -76,7 +82,7 @@ export const ResultTable = (props: ResultTableProps) => {
       render: (item) => {
         switch (item) {
           case RESULT_STATUS.PROCESS:
-            return <Tag color="processing">Chưa đến thời gian đánh giá</Tag>;
+            return <Tag color="processing">Đang đánh giá</Tag>;
           case RESULT_STATUS.SUCCESS:
             return <Tag color="success">Đạt chỉ tiêu</Tag>;
           case RESULT_STATUS.GOOD:

@@ -55,7 +55,7 @@ const EditTargetModal = (props: PropsModal) => {
       deadline: form.getFieldValue('deadline').toDate(),
       id: form.getFieldValue('id'),
       detail: form.getFieldValue('detail') || '',
-      detailPoint: form.getFieldValue('detailPoint') || 0,
+      detailPoint: Number(form.getFieldValue('detailPoint')) || 0,
       evaluationMethods: form.getFieldValue('evaluation_method'),
     });
     if (resp?.id) {

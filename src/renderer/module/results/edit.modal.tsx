@@ -83,7 +83,7 @@ const EditResultModal = (props: PropsModal) => {
     form.setFieldValue('teamId', props.data.teamId);
     // form.setFieldValue('checkPoint', props.data.checkPoint);
     form.setFieldValue('result', props.data.result);
-    form.setFieldValue('result', props.data.resultPoint);
+    form.setFieldValue('resultPoint', props.data.resultPoint);
     form.setFieldValue(
       'evaluation_method',
       props.data.target.evaluationMethods

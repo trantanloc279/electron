@@ -148,17 +148,17 @@ app
 // Prisma
 const dbPath = isDev
   ? path.join(__dirname, '../../prisma/database_dev.db')
-  : path.join(app.getPath('userData'), 'database_prod.db');
+  : path.join(app.getPath('userData'), 'database_qlct_prod.db');
 
 if (!isDev) {
   try {
     // database file does not exist, need to create
     let isExist = fs.existsSync(
-      path.join(app.getPath('userData'), 'database_prod.db')
+      path.join(app.getPath('userData'), 'database_qlct_prod.db')
     );
     if (!isExist) {
       fs.copyFileSync(
-        path.join(process.resourcesPath, 'prisma/dev.db'),
+        path.join(process.resourcesPath, 'prisma/database_dev.db'),
         dbPath,
         fs.constants.COPYFILE_EXCL
       );

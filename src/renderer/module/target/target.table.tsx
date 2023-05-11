@@ -12,6 +12,8 @@ interface TargetEntity {
   title: string;
   description: string;
   deadline: Date;
+  detail: string;
+  detailPoint: number;
 }
 
 interface TargetTableProps {
@@ -45,16 +47,15 @@ export const TargetTable = (props: TargetTableProps) => {
     },
     {
       title: 'Cụ thể',
-      children: [
-        {
-          dataIndex: 'detail',
-          render: (item) => (item ? item : ''),
-        },
-        {
-          dataIndex: 'detailPoint',
-          render: (item) => (item ? item : ''),
-        },
-      ],
+      render: (_, record) => {
+        if (!!record.detail) {
+          return record.detail;
+        }
+        if (!!record.detailPoint) {
+          return record.detailPoint;
+        }
+        return '';
+      },
     },
 
     {

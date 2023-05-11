@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const items: MenuProps['items'] = [
   {
-    label: 'Đội',
+    label: 'Đơn vị',
     key: 'team',
     icon: <AppstoreOutlined />,
   },
