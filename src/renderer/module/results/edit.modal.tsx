@@ -204,6 +204,7 @@ const EditResultModal = (props: PropsModal) => {
           {[
             EVALUATION_METHOD.METHOD_TWO,
             EVALUATION_METHOD.METHOD_THREE,
+            EVALUATION_METHOD.METHOD_FOUR,
           ].includes(props.data.target.evaluationMethods) && (
             <Form.Item
               label="Điểm đánh giá"
@@ -234,6 +235,27 @@ const EditResultModal = (props: PropsModal) => {
               ]}
             >
               <Select allowClear disabled>
+                <Option value={1}>Trên</Option>
+                <Option value={0}>Dưới</Option>
+              </Select>
+            </Form.Item>
+          )}
+          {[EVALUATION_METHOD.METHOD_FOUR].includes(
+            props.data.target.evaluationMethods
+          ) && (
+            <Form.Item
+              label="Đánh giá"
+              tooltip="This is a required field"
+              name="conditionEvaluationMethodTwo"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Đánh giá!',
+                },
+              ]}
+            >
+              <Select allowClear disabled>
+                <Option value={2}>Bằng</Option>
                 <Option value={1}>Trên</Option>
                 <Option value={0}>Dưới</Option>
               </Select>

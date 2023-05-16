@@ -167,6 +167,7 @@ const CreateTargetModal = (props: PropsModal) => {
           {[
             EVALUATION_METHOD.METHOD_TWO,
             EVALUATION_METHOD.METHOD_THREE,
+            EVALUATION_METHOD.METHOD_FOUR,
           ].includes(method_evaluate) && (
             <Form.Item
               label="Cụ thể đánh giá"
@@ -196,6 +197,25 @@ const CreateTargetModal = (props: PropsModal) => {
               ]}
             >
               <Select onChange={(e) => set_sub_method_evaluate(e)} allowClear>
+                <Option value={1}>Trên</Option>
+                <Option value={0}>Dưới</Option>
+              </Select>
+            </Form.Item>
+          )}
+          {[EVALUATION_METHOD.METHOD_FOUR].includes(method_evaluate) && (
+            <Form.Item
+              label="Đánh giá"
+              tooltip="This is a required field"
+              name="conditionEvaluationMethodTwo"
+              rules={[
+                {
+                  required: true,
+                  message: ' Vui lòng Đánh giá!',
+                },
+              ]}
+            >
+              <Select onChange={(e) => set_sub_method_evaluate(e)} allowClear>
+                <Option value={2}>Bằng</Option>
                 <Option value={1}>Trên</Option>
                 <Option value={0}>Dưới</Option>
               </Select>

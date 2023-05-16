@@ -1,13 +1,19 @@
-import { Button, Popconfirm, Table, Tag } from 'antd';
+import { Button, Input, InputRef, Popconfirm, Space, Table, Tag } from 'antd';
 import { ColumnsType, TableProps } from 'antd/es/table';
 import { ipcRenderer } from 'electron';
-import { useEffect, useState } from 'react';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { useEffect, useRef, useState } from 'react';
+import {
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
 import { toast } from 'react-toastify';
 import EditResultModal from './edit.modal';
 import RESULT_STATUS from 'renderer/constant/ResultStatus';
 import EVALUATION_METHOD from 'renderer/constant/EvaluationMethod';
 import { Excel } from 'antd-table-saveas-excel';
+import { ColumnType, FilterConfirmProps } from 'antd/es/table/interface';
+import Highlighter from 'react-highlight-words';
 
 interface ResultEntity {
   id: React.Key;
@@ -35,22 +41,113 @@ export const ResultTable = (props: ResultTableProps) => {
       title: 'Chỉ tiêu',
       dataIndex: 'target',
       render: (item) => item.title,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => {
+        return (
+          <>
+            <Input
+              autoFocus
+              placeholder="Type text here"
+              value={selectedKeys[0]}
+              onChange={(e) => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                confirm({ closeDropdown: false });
+              }}
+              onPressEnter={() => {
+                confirm();
+              }}
+              onBlur={() => {
+                confirm();
+              }}
+            ></Input>
+          </>
+        );
+      },
+      filterIcon: () => {
+        return <SearchOutlined />;
+      },
+      onFilter: (value, record) => {
+        return record.target.title.includes(value);
+      },
     },
     {
       title: 'Nội dung chỉ tiêu',
       dataIndex: 'target',
       render: (item) => item.description,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => {
+        return (
+          <>
+            <Input
+              autoFocus
+              placeholder="Type text here"
+              value={selectedKeys[0]}
+              onChange={(e) => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                confirm({ closeDropdown: false });
+              }}
+              onPressEnter={() => {
+                confirm();
+              }}
+              onBlur={() => {
+                confirm();
+              }}
+            ></Input>
+          </>
+        );
+      },
+      filterIcon: () => {
+        return <SearchOutlined />;
+      },
+      onFilter: (value, record) => {
+        return record.target.description.includes(value);
+      },
     },
     {
       title: 'Đơn vị theo dõi',
       dataIndex: 'team',
       render: (item) => item.name,
+      filterDropdown: ({
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+      }) => {
+        return (
+          <>
+            <Input
+              autoFocus
+              placeholder="Type text here"
+              value={selectedKeys[0]}
+              onChange={(e) => {
+                setSelectedKeys(e.target.value ? [e.target.value] : []);
+                confirm({ closeDropdown: false });
+              }}
+              onPressEnter={() => {
+                confirm();
+              }}
+              onBlur={() => {
+                confirm();
+              }}
+            ></Input>
+          </>
+        );
+      },
+      filterIcon: () => {
+        return <SearchOutlined />;
+      },
+      onFilter: (value, record) => {
+        return record.team.name.includes(value);
+      },
     },
-    // {
-    //   title: 'Thời gian chốt số liệu',
-    //   dataIndex: 'target',
-    //   render: (value) => `${dayjs(value.deadline).format('DD/MM/YYYY')}`,
-    // },
     {
       title: 'Cụ thể',
       dataIndex: 'target',
@@ -59,6 +156,7 @@ export const ResultTable = (props: ResultTableProps) => {
           [
             EVALUATION_METHOD.METHOD_TWO,
             EVALUATION_METHOD.METHOD_THREE,
+            EVALUATION_METHOD.METHOD_FOUR,
           ].includes(item.evaluationMethods)
         ) {
           return item.detailPoint;
@@ -81,7 +179,7 @@ export const ResultTable = (props: ResultTableProps) => {
     {
       title: 'Đánh giá',
       dataIndex: 'status',
-      render: (item) => {
+      render: (item: any) => {
         switch (item) {
           case RESULT_STATUS.PROCESS:
             return <Tag color="processing">Đang đánh giá</Tag>;
@@ -148,10 +246,13 @@ export const ResultTable = (props: ResultTableProps) => {
     set_open(true);
   };
 
-  const delete_team = (value: any) => {
-    toast.success(' Chưa làm!', {
+  const delete_team = async (value: any) => {
+    let resp = await ipcRenderer.invoke('DELETE_RESULT', value);
+    console.log(resp);
+    get_data();
+    toast.success(' Thành công!', {
       position: 'top-right',
-      autoClose: 3000,
+      autoClose: 5000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -163,9 +264,9 @@ export const ResultTable = (props: ResultTableProps) => {
   const get_data = async () => {
     let data = await ipcRenderer.invoke('GET_LIST_RESULT', true);
     set_data(data);
-
     console.log(data);
   };
+
   const get_string_status = (item: any) => {
     switch (item.status) {
       case RESULT_STATUS.PROCESS:

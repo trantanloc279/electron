@@ -368,6 +368,13 @@ app.on('ready', () => {
         id: message.targetId,
       },
     });
+    if (target.evaluationMethods == EVALUATION_METHOD.METHOD_ONE) {
+      if (message.result.toUpperCase() == target.detail.toUpperCase()) {
+        status = RESULT_STATUS.SUCCESS;
+      } else {
+        status = RESULT_STATUS.FAILED;
+      }
+    }
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_TWO) {
       if (target.conditionEvaluationMethodTwo == 0) {
         if (message.resultPoint < target.detailPoint) {
@@ -394,6 +401,35 @@ app.on('ready', () => {
         status = RESULT_STATUS.GOOD;
       }
     }
+    if (target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR) {
+      if (target.conditionEvaluationMethodTwo == 0) {
+        if (message.resultPoint < target.detailPoint) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
+      }
+      if (target.conditionEvaluationMethodTwo == 1) {
+        if (message.resultPoint >= target.detailPoint) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
+      }
+
+      if (target.conditionEvaluationMethodTwo == 2) {
+        if (message.resultPoint == target.detailPoint) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
+      }
+      let current = new Date();
+      let deadline = new Date(target.deadline.toString());
+      if (current.getTime() < deadline.getTime()) {
+        status = RESULT_STATUS.PROCESS;
+      }
+    }
 
     let data = await prisma.result.update({
       where: { id: message.id },
@@ -403,6 +439,17 @@ app.on('ready', () => {
         resultPoint: Number(message.resultPoint),
         result: message.result,
         status: status,
+      },
+    });
+    console.log('data', data);
+    return data;
+  });
+
+  ipcMain.handle('DELETE_RESULT', async (e, message: any) => {
+    console.log('message', message);
+    let data = await prisma.result.delete({
+      where: {
+        id: message.id,
       },
     });
     console.log('data', data);
