@@ -301,6 +301,15 @@ app.on('ready', () => {
     return data;
   });
 
+  ipcMain.handle('DELETE_TEAM', async (e, message) => {
+    console.log(message);
+    let data = await prisma.team.delete({
+      where: { id: message.id },
+    });
+    console.log('data', data);
+    return data;
+  });
+
   // module target
   ipcMain.handle('GET_LIST_TARGET', async (e, message: any) => {
     console.log(message);
@@ -326,6 +335,15 @@ app.on('ready', () => {
     return data;
   });
 
+  ipcMain.handle('DELETE_TARGET', async (e, message) => {
+    console.log(message);
+    let data = await prisma.target.delete({
+      where: { id: message.id },
+    });
+    console.log('data', data);
+    return data;
+  });
+
   // module result
   ipcMain.handle('GET_LIST_RESULT', async (e, message: any) => {
     console.log(message);
@@ -346,10 +364,10 @@ app.on('ready', () => {
     let dto = {
       targetId: message.targetId,
       teamId: message.teamId,
-      status:
-        target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR
-          ? RESULT_STATUS.SUCCESS
-          : RESULT_STATUS.PROCESS,
+      status: RESULT_STATUS.PROCESS,
+      // target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR
+      //   ? RESULT_STATUS.SUCCESS
+      //   : RESULT_STATUS.PROCESS,
       result: '',
       resultPoint: 0,
     };
@@ -426,6 +444,8 @@ app.on('ready', () => {
       }
       let current = new Date();
       let deadline = new Date(target.deadline.toString());
+      console.log('current', current);
+      console.log('deadline', deadline);
       if (current.getTime() < deadline.getTime()) {
         status = RESULT_STATUS.PROCESS;
       }

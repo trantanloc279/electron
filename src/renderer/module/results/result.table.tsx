@@ -24,6 +24,7 @@ interface ResultEntity {
   resultPoint: number;
   target: any;
   team: any;
+  status: number;
 }
 
 interface ResultTableProps {
@@ -34,7 +35,8 @@ export const ResultTable = (props: ResultTableProps) => {
   const columns: ColumnsType<ResultEntity> = [
     {
       title: 'STT',
-      dataIndex: 'id',
+      key: 'index',
+      render: (text, record, index) => index + 1,
       width: '10%',
     },
     {
@@ -179,9 +181,23 @@ export const ResultTable = (props: ResultTableProps) => {
     {
       title: 'Đánh giá',
       dataIndex: 'status',
-      render: (item: any) => {
+      render: (item: any, record) => {
+        console.log('record', record);
         switch (item) {
           case RESULT_STATUS.PROCESS:
+            if (
+              record.target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR
+            ) {
+              let current = new Date();
+              let deadline = new Date(record.target.deadline.toString());
+              console.log('current', current);
+              console.log('deadline', deadline);
+              if (current.getTime() < deadline.getTime()) {
+                return (
+                  <Tag color="processing">Chưa đến thời gian đánh giá</Tag>
+                );
+              }
+            }
             return <Tag color="processing">Đang đánh giá</Tag>;
           case RESULT_STATUS.SUCCESS:
             return <Tag color="success">Đạt chỉ tiêu</Tag>;
@@ -267,9 +283,14 @@ export const ResultTable = (props: ResultTableProps) => {
     console.log(data);
   };
 
-  const get_string_status = (item: any) => {
+  const get_string_status = (item: ResultEntity) => {
     switch (item.status) {
       case RESULT_STATUS.PROCESS:
+        let current = new Date();
+        let deadline = new Date(item.target.deadline.toString());
+        if (current.getTime() < deadline.getTime()) {
+          return 'Chưa đến thời gian đánh giá';
+        }
         return 'Đang đánh giá';
       case RESULT_STATUS.SUCCESS:
         return 'Đạt chỉ tiêu';
@@ -281,21 +302,23 @@ export const ResultTable = (props: ResultTableProps) => {
   };
 
   const handleClick = () => {
-    let data_source = data.map((item) => {
+    let data_source = data.map((item, index) => {
       return {
-        stt: item.id,
+        stt: index + 1,
         target: item?.target.title,
         target_description: item?.target.description,
         team: item?.team.name,
         detail: [
           EVALUATION_METHOD.METHOD_TWO,
           EVALUATION_METHOD.METHOD_THREE,
+          EVALUATION_METHOD.METHOD_FOUR,
         ].includes(item?.target.evaluationMethods)
           ? item?.target.detailPoint
           : item?.target.detail,
         result: [
           EVALUATION_METHOD.METHOD_TWO,
           EVALUATION_METHOD.METHOD_THREE,
+          EVALUATION_METHOD.METHOD_FOUR,
         ].includes(item?.target.evaluationMethods)
           ? item?.resultPoint
           : item?.result,
@@ -304,7 +327,7 @@ export const ResultTable = (props: ResultTableProps) => {
     });
     const excel = new Excel();
     excel
-      .addSheet('test')
+      .addSheet('result')
       .addColumns([
         {
           title: 'STT',
@@ -335,10 +358,19 @@ export const ResultTable = (props: ResultTableProps) => {
           dataIndex: 'evaluate',
         },
       ])
+      .setTHeadStyle({
+        bold: true,
+        border: true,
+        borderColor: '#000000',
+      })
+      .setTBodyStyle({
+        border: true,
+        borderColor: '#000000',
+      })
       .addDataSource(data_source, {
         str2Percent: true,
       })
-      .saveAs('Excel.xlsx');
+      .saveAs(`result_${new Date().getTime()}.xlsx`);
   };
 
   useEffect(() => {

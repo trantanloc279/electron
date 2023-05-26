@@ -19,7 +19,8 @@ export const TeamTable = (props: TeamTableProps) => {
   const columns: ColumnsType<TeamEntity> = [
     {
       title: 'STT',
-      dataIndex: 'id',
+      key: 'index',
+      render: (text, record, index) => index + 1,
       width: '10%',
     },
     {
@@ -82,18 +83,33 @@ export const TeamTable = (props: TeamTableProps) => {
     set_open(true);
   };
 
-  const delete_team = (value: any) => {
+  const delete_team = async (value: any) => {
     console.log('value', value);
-    toast.success(' Chưa làm!', {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: 'light',
-    });
+    let data = await ipcRenderer.invoke('DELETE_TEAM', value);
+    if (data.id) {
+      toast.success(' Xóa thành công!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+    } else {
+      toast.success(' Xóa thất bại!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+      });
+    }
+    get_data();
   };
 
   const get_data = async () => {

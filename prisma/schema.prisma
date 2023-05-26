@@ -35,8 +35,8 @@ model Result {
   id          Int     @id @default(autoincrement())
   teamId      Int
   targetId    Int
-  team        Team    @relation(fields: [teamId], references: [id])
-  target      Target  @relation(fields: [targetId], references: [id])
+  team        Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  target      Target  @relation(fields: [targetId], references: [id], onDelete: Cascade)
   status      Int
   result      String?
   resultPoint Int?
