@@ -206,7 +206,58 @@ export const ResultTable = (props: ResultTableProps) => {
           case RESULT_STATUS.FAILED:
             return <Tag color="error">Chưa đạt chỉ tiêu</Tag>;
         }
-        // return item;
+      },
+      filters: [
+        {
+          text: 'Chưa đến thời gian đánh giá',
+          value: 'Chưa đến thời gian đánh giá',
+        },
+        {
+          text: 'Đang đánh giá',
+          value: 'Đang đánh giá',
+        },
+        {
+          text: 'Đạt chỉ tiêu',
+          value: 'Đạt chỉ tiêu',
+        },
+        {
+          text: 'Chưa đạt chỉ tiêu',
+          value: 'Chưa đạt chỉ tiêu',
+        },
+        {
+          text: 'Vượt chỉ tiêu',
+          value: 'Vượt chỉ tiêu',
+        },
+      ],
+      onFilter: (value, record: ResultEntity) => {
+        let tmp = '';
+        switch (record.status) {
+          case RESULT_STATUS.PROCESS:
+            if (
+              record.target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR
+            ) {
+              let current = new Date();
+              let deadline = new Date(record.target.deadline.toString());
+              console.log('current', current);
+              console.log('deadline', deadline);
+              if (current.getTime() < deadline.getTime()) {
+                tmp = 'Chưa đến thời gian đánh giá';
+              }
+              break;
+            }
+            tmp = 'Đang đánh giá';
+            break;
+          case RESULT_STATUS.SUCCESS:
+            tmp = 'Đạt chỉ tiêu';
+            break;
+          case RESULT_STATUS.GOOD:
+            tmp = 'Vượt chỉ tiêu';
+            break;
+          case RESULT_STATUS.FAILED:
+            tmp = 'Chưa đạt chỉ tiêu';
+            break;
+        }
+        return tmp.startsWith(value + '');
       },
     },
     {

@@ -385,11 +385,16 @@ app.on('ready', () => {
         id: message.targetId,
       },
     });
+    if (target == null) {
+      return;
+    }
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_ONE) {
-      if (message.result.toUpperCase() == target.detail.toUpperCase()) {
-        status = RESULT_STATUS.SUCCESS;
-      } else {
-        status = RESULT_STATUS.FAILED;
+      if (message.status == 0) {
+        if (message.result.toUpperCase() == target.detail.toUpperCase()) {
+          status = RESULT_STATUS.SUCCESS;
+        } else {
+          status = RESULT_STATUS.FAILED;
+        }
       }
     }
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_TWO) {
@@ -419,26 +424,28 @@ app.on('ready', () => {
       }
     }
     if (target.evaluationMethods == EVALUATION_METHOD.METHOD_FOUR) {
-      if (target.conditionEvaluationMethodTwo == 0) {
-        if (message.resultPoint < target.detailPoint) {
-          status = RESULT_STATUS.SUCCESS;
-        } else {
-          status = RESULT_STATUS.FAILED;
+      if (message.status == 0) {
+        if (target.conditionEvaluationMethodTwo == 0) {
+          if (message.resultPoint < target.detailPoint) {
+            status = RESULT_STATUS.SUCCESS;
+          } else {
+            status = RESULT_STATUS.FAILED;
+          }
         }
-      }
-      if (target.conditionEvaluationMethodTwo == 1) {
-        if (message.resultPoint >= target.detailPoint) {
-          status = RESULT_STATUS.SUCCESS;
-        } else {
-          status = RESULT_STATUS.FAILED;
+        if (target.conditionEvaluationMethodTwo == 1) {
+          if (message.resultPoint >= target.detailPoint) {
+            status = RESULT_STATUS.SUCCESS;
+          } else {
+            status = RESULT_STATUS.FAILED;
+          }
         }
-      }
 
-      if (target.conditionEvaluationMethodTwo == 2) {
-        if (message.resultPoint == target.detailPoint) {
-          status = RESULT_STATUS.SUCCESS;
-        } else {
-          status = RESULT_STATUS.FAILED;
+        if (target.conditionEvaluationMethodTwo == 2) {
+          if (message.resultPoint == target.detailPoint) {
+            status = RESULT_STATUS.SUCCESS;
+          } else {
+            status = RESULT_STATUS.FAILED;
+          }
         }
       }
       let current = new Date();
