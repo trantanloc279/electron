@@ -79,8 +79,8 @@ export const TargetTable = (props: TargetTableProps) => {
             />
 
             <Popconfirm
-              title="Xoá đội"
-              description="Bạn có chắc xóa đội này không?"
+              title="Xoá chỉ tiêu"
+              description="Bạn có chắc xóa chỉ tiêu này không?"
               onConfirm={(e) => delete_team(value)}
               // onCancel={cancel}
               okText="Yes"

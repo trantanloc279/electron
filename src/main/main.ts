@@ -21,7 +21,7 @@ import RESULT_STATUS from './ResultStatus';
 import fs from 'fs';
 import EVALUATION_METHOD from './EvaluationMethod';
 // import { PrismaClient } from '@prisma/client';
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 export default class AppUpdater {
   constructor() {
@@ -106,10 +106,8 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
-
   // Open urls in the user's browser
   mainWindow.webContents.on('new-window', (event, url) => {
     event.preventDefault();
@@ -267,6 +265,7 @@ const prisma = new PrismaClient({
 });
 
 app.on('ready', () => {
+  console.log('ready');
   // module team
   ipcMain.on('data', async (e, message: any) => {
     console.log(message);
